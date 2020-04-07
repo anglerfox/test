@@ -1,0 +1,80 @@
+<html>
+    <head>
+       
+    </head>
+    <body>
+
+        <div style="font-family: monospace;    margin-top: 10%;    margin-left: 20%;">
+          <p id="name">Loading Information</p>
+          <p id="email"></p><br>
+          <a style="display: none;" id="signout" href="#" onclick="signOut();">Sign out</a>
+        </div>
+
+
+        <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
+       
+        <script>
+
+
+function init() {
+  gapi.load('auth2', function() {
+    
+
+    auth2 = gapi.auth2.init({
+        client_id: '742702697438-gjsjf4i2apj70vl7u5mmnh6dcm3pg4di.apps.googleusercontent.com',
+        cookiepolicy: 'single_host_origin',
+        scope: 'profile email',
+        fetch_basic_profile: true,
+        redirect_uri: 'http://test.akamai.com/signin.html'
+     }).then(function(auth2) {
+            console.log( "SignedIn? - " + auth2.isSignedIn.get() );  
+
+            // Listen for sign-in state changes.
+            auth2.isSignedIn.listen(updateDOM);
+
+            // Listen for changes to current user.
+            auth2.currentUser.listen(updateDOM);
+
+            if (auth2.isSignedIn.get() == false) {
+              document.getElementById("signout").style.display = "none";
+              auth2.signIn();
+            } else {
+              document.getElementById("signout").style.display = "block";
+              user = auth2.currentUser.get();
+              updateDOM(user);
+            }
+            
+        });  
+
+
+
+  });
+}
+
+
+var updateDOM = function (user) {
+  console.log("trying to update dom - ");
+  if(user){
+    document.getElementById("email").innerText = user.getBasicProfile().getEmail();
+    document.getElementById("name").innerText = user.getBasicProfile().getName();
+    document.getElementById("signout").style.display = "block";
+  } else {
+    document.getElementById("email").innerText = "Not Logged In";
+    document.getElementById("name").innerText = "";
+    document.getElementById("signout").style.display = "none";
+  }
+
+}
+ 
+
+
+function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+  }
+
+        </script>
+    </body>
+</html>
